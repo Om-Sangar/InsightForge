@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from datetime import datetime
 import pandas as pd
+import math
 import io
 
 from backend.data_profiler import profile_dataframe
@@ -26,6 +27,22 @@ class Suggestion(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     history: list[dict] = []
+
+
+def clean_for_json(records: list[dict]) -> list[dict]:
+    """Replace any NaN/NaT values with None so the response is valid JSON."""
+    cleaned = []
+    for row in records:
+        clean_row = {}
+        for key, value in row.items():
+            if isinstance(value, float) and math.isnan(value):
+                clean_row[key] = None
+            elif pd.isna(value):
+                clean_row[key] = None
+            else:
+                clean_row[key] = value
+        cleaned.append(clean_row)
+    return cleaned
 
 
 @app.post("/upload")
@@ -140,3 +157,22 @@ async def chat_with_assistant(req: ChatRequest):
     profile = profile_dataframe(df) if df is not None else None
     reply = generate_chat_reply(req.message, req.history, profile)
     return {"reply": reply}
+
+
+@app.get("/outlier-values")
+async def get_outlier_values(column: str):
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    q1 = df[column].quantile(0.25)
+    q3 = df[column].quantile(0.75)
+    iqr = q3 - q1
+    lower = q1 - 1.5 * iqr
+    upper = q3 + 1.5 * iqr
+
+    outliers = df[(df[column] < lower) | (df[column] > upper)]
+    records = outliers.to_dict(orient="records")
+    records = clean_for_json(records)
+
+    return {"outlier_rows": records}

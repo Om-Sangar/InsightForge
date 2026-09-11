@@ -25,48 +25,39 @@ Return ONLY a JSON array, no other text, no markdown formatting, in this exact f
   }}
 ]
 
-Only use these exact action values: fill_median, fill_mode, drop_duplicates.
+Only use these exact action values: fill_median, fill_mode, drop_duplicates, cap_outliers, standardize_text.
 If there are no issues, return an empty array: []
 """
-
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=prompt
-    )
-
-    raw_text = response.text.strip()
-    raw_text = raw_text.replace("```json", "").replace("```", "").strip()
-
     try:
-        suggestions = json.loads(raw_text)
-    except json.JSONDecodeError:
-        suggestions = []
-
-    return suggestions
+        response = client.models.generate_content(model="gemini-3.6-flash", contents=prompt)
+        raw_text = response.text.strip().replace("```json", "").replace("```", "").strip()
+        return json.loads(raw_text)
+    except Exception:
+        return []
 
 
 def generate_chat_reply(message: str, history: list, profile: dict | None) -> str:
     context = ""
     if profile:
-        context = f"Current dataset profile:\n{json.dumps(profile, indent=2)}\n\n"
+        context = f"Current dataset profile (reflects the LATEST cleaned state, not the original upload):\n{json.dumps(profile, indent=2)}\n\n"
 
     convo = ""
-    for turn in history:
+    for turn in history[-10:]:  # keep prompt small — only recent turns
         role = "User" if turn["role"] == "user" else "Assistant"
         convo += f"{role}: {turn['content']}\n"
 
     prompt = f"""You are the Forge Assistant, a helpful data cleaning and analysis assistant
-inside InsightForge. Answer the user's question conversationally and concisely,
-using the dataset profile as context when relevant. Keep answers short (2-4 sentences)
-unless the user asks for detail. If a cleaning action would help, describe it in plain
-language — the user applies actions through the suggestion cards, not through this chat.
+inside InsightForge. Answer conversationally and concisely (2-4 sentences unless asked for
+more detail), using the dataset profile as context when relevant. If a cleaning action would
+help, describe it in plain language — the user applies actions through the suggestion cards,
+not through this chat.
 
 {context}Conversation so far:
 {convo}User: {message}
 Assistant:"""
 
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=prompt
-    )
-    return response.text.strip()
+    try:
+        response = client.models.generate_content(model="gemini-3.6-flash", contents=prompt)
+        return response.text.strip()
+    except Exception:
+        return "Sorry, I ran into an error reaching Gemini. Please try again in a moment."
