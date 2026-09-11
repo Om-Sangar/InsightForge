@@ -1,14 +1,32 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from datetime import datetime
 import pandas as pd
 import io
+
 from backend.data_profiler import profile_dataframe
 from backend.suggestions import generate_suggestions
 from backend.cleaning_actions import apply_action
+from backend.ai_assistant import generate_ai_suggestions, generate_chat_reply
 
 app = FastAPI()
 
-# Temporary in-memory storage — holds the "current" dataset between requests
-current_data = {"df": None}
+current_data = {"df": None, "log": []}
+
+
+class Suggestion(BaseModel):
+    column: str | None = None
+    issue: str | None = None
+    message: str | None = None
+    action: str
+    severity: str | None = None
+
+
+class ChatRequest(BaseModel):
+    message: str
+    history: list[dict] = []
+
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -16,7 +34,8 @@ async def upload_file(file: UploadFile = File(...)):
     df = pd.read_csv(io.BytesIO(contents))
     df.columns = df.columns.str.strip()
 
-    current_data["df"] = df  # save it so /apply can use it later
+    current_data["df"] = df
+    current_data["log"] = []
 
     profile = profile_dataframe(df)
     suggestions = generate_suggestions(profile)
@@ -35,7 +54,14 @@ async def apply_cleaning(action: str, column: str = None):
         return {"error": "No dataset uploaded yet. Upload a file first."}
 
     df = apply_action(df, action, column)
-    current_data["df"] = df  # save the updated version
+    current_data["df"] = df
+
+    current_data["log"].append({
+        "action": action,
+        "column": column,
+        "message": f"Applied '{action}' on column '{column}'",
+        "timestamp": datetime.now().strftime("%H:%M:%S")
+    })
 
     new_profile = profile_dataframe(df)
     new_suggestions = generate_suggestions(new_profile)
@@ -43,5 +69,74 @@ async def apply_cleaning(action: str, column: str = None):
     return {
         "message": f"Applied '{action}' on column '{column}'",
         "profile": new_profile,
-        "suggestions": new_suggestions
+        "suggestions": new_suggestions,
+        "cleaning_log": current_data["log"]
     }
+
+
+@app.post("/apply-suggestion")
+async def apply_suggestion(suggestion: Suggestion):
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet. Upload a file first."}
+
+    df = apply_action(df, suggestion.action, suggestion.column)
+    current_data["df"] = df
+
+    current_data["log"].append({
+        "action": suggestion.action,
+        "column": suggestion.column,
+        "message": suggestion.message or f"Applied '{suggestion.action}' on column '{suggestion.column}'",
+        "timestamp": datetime.now().strftime("%H:%M:%S")
+    })
+
+    new_profile = profile_dataframe(df)
+    new_rule_suggestions = generate_suggestions(new_profile)
+
+    return {
+        "message": f"Applied '{suggestion.action}' on column '{suggestion.column}'",
+        "profile": new_profile,
+        "remaining_suggestions": new_rule_suggestions,
+        "cleaning_log": current_data["log"]
+    }
+
+
+@app.post("/ai-suggest")
+async def ai_suggest():
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet. Upload a file first."}
+
+    profile = profile_dataframe(df)
+    ai_suggestions = generate_ai_suggestions(profile)
+
+    return {
+        "profile": profile,
+        "ai_suggestions": ai_suggestions
+    }
+
+
+@app.get("/cleaning-log")
+async def get_cleaning_log():
+    return {"cleaning_log": current_data["log"]}
+
+
+@app.get("/download")
+async def download_data():
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    stream = io.StringIO()
+    df.to_csv(stream, index=False)
+    response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=cleaned_data.csv"
+    return response
+
+
+@app.post("/chat")
+async def chat_with_assistant(req: ChatRequest):
+    df = current_data["df"]
+    profile = profile_dataframe(df) if df is not None else None
+    reply = generate_chat_reply(req.message, req.history, profile)
+    return {"reply": reply}

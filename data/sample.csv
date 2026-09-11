@@ -1,5 +1,40 @@
-   name,age,city
-   Om,21,Kolhapur
-   Riya,,Pune
-   Aman,23,
-   Sara,22,Mumbai
+"customer_id,name,age,city,region,purchase_amount",age,city
+"126,Riya Patel,33,KOLHAPUR,North,3346.95",21,Kolhapur
+"126,Riya Patel,33,KOLHAPUR,North,3346.95",,Pune
+"123,Riya Shaikh,20,mumbai,North,3617.3",23,
+"103,Ishaan Gupta,45, pune,East,3867.15",Mumbai,Mumbai
+"122,Aarav Nair,, pune,South,3591.91",,
+"106,Ananya Patel,, pune,West,2941.12",,
+"104,Riya Sharma,26,mumbai,East,3182.2",,
+"134,Kabir Reddy,53,,West,54630.55",,
+"124,Aarav Nair,25,Pune,West,2242.37",,
+"105,Meera Gupta,54,Nagpur,North,3645.55",,
+"100,Rohan Patel,41,Kolhapur,West,49384.65",,
+"125,Kabir Patel,,KOLHAPUR,West,43946.67",,
+"102,Meera Gupta,18, pune,West,1414.69",,
+"120,Diya Iyer,51,mumbai,East,1374.48",,
+"119,Meera Shaikh,38,Mumbai,West,3283.15",,
+"133,Rohan Shaikh,52,Kolhapur,East,1130.43",,
+"110,Diya Iyer,57,Kolhapur,South,1461.17",,
+"109,Ananya Shaikh,20,,West,2519.12",,
+"118,Ishaan Patel,23,Pune,East,1301.22",,
+"128,Aarav Patel,20,,East,3906.36",,
+"101,Rohan Shaikh,,Nagpur,East,2664.55",,
+"111,Diya Nair,51, pune,West,58812.43",,
+"113,Diya Reddy,19,mumbai,North,522.3",,
+"129,Meera Nair,38,Mumbai,East,2693.58",,
+"131,Arjun Patel,20,mumbai,East,2655.7",,
+"132,Aarav Reddy,58,Mumbai,East,3816.07",,
+"121,Diya Patel,30,KOLHAPUR,East,2367.82",,
+"117,Rohan Reddy,29,Kolhapur,West,2522.68",,
+"115,Ananya Nair,37,Pune,South,3105.0",,
+"112,Ananya Gupta,58,Nagpur,South,2228.17",,
+"107,Ananya Verma,22,Nagpur,West,1573.1",,
+"114,Kabir Reddy,56,Kolhapur,West,3832.91",,
+"130,Ananya Shaikh,39,,West,2949.36",,
+"127,Aarav Iyer,33, pune,East,488.6",,
+"108,Aarav Iyer,45,Kolhapur,West,51727.5",,
+"109,Ananya Shaikh,20,,West,2519.12",,
+"116,Ananya Gupta,24,mumbai,North,1447.06",,
+"114,Kabir Reddy,56,Kolhapur,West,3832.91",,
+"113,Diya Reddy,19,mumbai,North,522.3",,

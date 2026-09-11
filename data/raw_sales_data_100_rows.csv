@@ -1,0 +1,101 @@
+Order_ID,Order_Date,Customer_Name,Customer_Age,City,Product,Category,Quantity,Unit_Price,Discount_Percent,Payment_Method,Total_Amount
+ORD1001,2025-05-06,Sneha,32.0,Satara,Mouse,Electronics,1.0,650,,card,
+ORD1002,2025-01-17,Aarav,42.0,Pune,Mouse,Electronics,2.0,650,15.0,Card,1105.0
+ORD1003,2025-11-29,Vikram,28.0,Kolhapur,Monitor,Electronics,1.0,12500,15.0,Net Banking,10625.0
+ORD1004,2025-12-24,Vikram,24.0,Nagpur,Backpack,Accessories,5.0,2200,0.0,Cash,11000.0
+ORD1005,2025-02-17,Vikram,21.0,Pune,Keyboard,Electronics,4.0,1200,5.0,Cash,4560.0
+ORD1006,2025-10-02,Priya,50.0,Mumbai ,Office Chair,Furniture,5.0,8500,0.0,UPI,42500.0
+ORD1007,2025-10-23,Sneha,36.0,Pune,Pen Set,Stationery,5.0,150,,UPI,
+ORD1008,2025-02-21,Vikram,28.0,,Monitor,Electronics,5.0,12500,0.0,Net Banking,62500.0
+ORD1009,2025-04-18,Om,36.0,Pune,Office Chair,Furniture,3.0,8500,5.0,upi,24225.0
+ORD1010,2025-07-14,Om,50.0,Kolhapur,Keyboard,Electronics,4.0,1200,0.0,card,4800.0
+ORD1011,2025-06-11,Vikram,18.0,Nashik,Office Chair,Furniture,1.0,8500,0.0,UPI,8500.0
+ORD1012,2025-07-22,Isha,50.0,Satara,Monitor,Electronics,6.0,12500,0.0,Cash,75000.0
+ORD1013,2025-10-03,Om,,Mumbai ,Keyboard,Electronics,4.0,1200,,upi,
+ORD1014,2025-09-18,Isha,24.0,Pune,Desk,Furniture,6.0,7000,0.0,UPI,42000.0
+ORD1015,2025-12-15,Vikram,24.0,Pune,Mouse,Electronics,3.0,650,,Net Banking,
+ORD1016,2025-10-11,Aarav,32.0,Pune,Desk,Furniture,8.0,7000,15.0,card,47600.0
+ORD1017,2025-02-27,Om,36.0,Mumbai ,Pen Set,Stationery,5.0,150,,Card,
+ORD1018,2025-09-14,Rahul,32.0,Pune,Notebook,Stationery,1.0,80,,card,
+ORD1019,2025-03-24,Aarav,36.0,Nagpur,laptop,Electronics,4.0,1800,0.0,Net Banking,7200.0
+ORD1020,2025-05-03,Aarav,32.0,Kolhapur,Laptop,Electronics,2.0,55000,5.0,upi,104500.0
+ORD1021,2025-02-05,Rahul,50.0,Satara,Mouse,Electronics,2.0,650,,card,
+ORD1022,2025-11-07,Vikram,,Kolhapur,Notebook,Stationery,3.0,80,5.0,upi,228.0
+ORD1023,2025-08-13,Isha,36.0,Pune,Monitor,Electronics,5.0,12500,10.0,Card,56250.0
+ORD1024,2025-10-29,Sneha,18.0,Kolhapur,Monitor,Electronics,2.0,12500,5.0,UPI,23750.0
+ORD1025,2025-01-17,Ananya,21.0,Pune,Mouse,Electronics,1.0,650,0.0,upi,650.0
+ORD1026,2025-04-20,Rahul,50.0,pune,Monitor,Electronics,5.0,12500,,Card,
+ORD1027,2025-02-19,Vikram,21.0,Nagpur,Notebook,Stationery,7.0,80,0.0,Net Banking,560.0
+ORD1028,2025-12-11,Priya,18.0,Mumbai,Desk,Furniture,8.0,7000,,Net Banking,
+ORD1029,2025-04-08,Isha,28.0,Satara,Office Chair,Furniture,2.0,8500,0.0,Net Banking,17000.0
+ORD1030,2025-02-08,Isha,28.0,Pune,Keyboard,Electronics,5.0,1200,10.0,UPI,5400.0
+ORD1031,2025-03-27,Vikram,28.0,pune,Pen Set,Stationery,1.0,150,0.0,Net Banking,150.0
+ORD1032,2025-07-14,Aarav,24.0,Mumbai ,Monitor,Electronics,7.0,12500,0.0,Cash,87500.0
+ORD1033,2025-12-05,Isha,,Satara,Notebook,Stationery,5.0,80,10.0,Card,360.0
+ORD1034,2025-02-01,Ananya,,Mumbai,Headphones,Electronics,4.0,1800,0.0,UPI,7200.0
+ORD1035,2025-03-22,Aarav,,Pune,Backpack,Accessories,,2200,15.0,Card,14960.0
+ORD1036,2025-07-26,Priya,28.0,Kolhapur,Mouse,Electronics,2.0,650,,upi,
+ORD1037,2025-08-03,Ananya,21.0,Nashik,Backpack,Accessories,1.0,2200,15.0,Card,1870.0
+ORD1038,2025-03-09,Om,42.0,pune,Office Chair,Furniture,4.0,8500,5.0,Cash,32300.0
+ORD1039,2025-02-07,Sneha,21.0,Nashik,Mouse,Electronics,1.0,650,10.0,Card,585.0
+ORD1040,2025-05-26,Rahul,36.0,pune,Office Chair,Furniture,2.0,8500,0.0,upi,17000.0
+ORD1041,2025-06-03,Priya,,Satara,Headphones,Electronics,1.0,1800,,Cash,
+ORD1042,2025-03-21,Om,,Nashik,Mouse,Electronics,2.0,650,,upi,
+ORD1043,2025-09-16,Isha,32.0,Nashik,Monitor,Electronics,6.0,12500,0.0,UPI,75000.0
+ORD1044,2025-01-02,Ananya,18.0,Satara,Mouse,Electronics,7.0,650,5.0,card,4322.5
+ORD1045,2025-10-10,Vikram,50.0,Mumbai,Headphones,Electronics,3.0,1800,,UPI,
+ORD1046,2025-07-09,Rahul,18.0,Mumbai ,Mouse,Electronics,3.0,650,15.0,Card,1657.5
+ORD1047,2025-07-03,Sneha,18.0,Kolhapur,Laptop,Electronics,5.0,55000,5.0,card,261250.0
+ORD1048,2025-11-14,Rahul,42.0,Kolhapur,Mouse,Electronics,6.0,650,15.0,Card,3315.0
+ORD1049,2025-06-20,Vikram,24.0,Kolhapur,Keyboard,Electronics,7.0,1200,0.0,Cash,8400.0
+ORD1050,2025-08-29,Sneha,18.0,Kolhapur,Keyboard,Electronics,2.0,1200,10.0,Net Banking,2160.0
+ORD1051,2025-01-13,Sneha,28.0,Mumbai ,Office Chair,Furniture,5.0,8500,0.0,Cash,42500.0
+ORD1052,2025-11-25,Vikram,36.0,Nagpur,Headphones,Electronics,2.0,1800,5.0,UPI,3420.0
+ORD1053,2025-01-20,Priya,32.0,Mumbai ,Mouse,Electronics,5.0,650,0.0,Cash,3250.0
+ORD1054,2025-03-01,Vikram,,Kolhapur,Office Chair,Furniture,7.0,8500,15.0,Cash,50575.0
+ORD1055,2025-10-03,Sneha,,Nagpur,Laptop,Electronics,7.0,55000,0.0,Net Banking,385000.0
+ORD1056,2025-12-06,Priya,36.0,Nashik,Mouse,Electronics,6.0,650,15.0,upi,3315.0
+ORD1057,2025-12-23,Om,42.0,Satara,Headphones,Electronics,7.0,1800,5.0, UPI ,11970.0
+ORD1058,2025-11-12,Om,24.0,Mumbai ,Desk,Furniture,7.0,7000,,upi,
+ORD1059,2025-08-09,Ananya,28.0,pune,Laptop,Electronics,5.0,55000,5.0,Net Banking,261250.0
+ORD1060,2025-03-28,Priya,50.0,Nashik,Notebook,Stationery,4.0,80,15.0,upi,272.0
+ORD1061,2025-12-11,Om,28.0,Kolhapur,Backpack,Accessories,6.0,2200,0.0,Card,13200.0
+ORD1062,2025-09-01,Priya,28.0,pune,Keyboard,Electronics,1.0,1200,0.0,Net Banking,1200.0
+ORD1063,2025-09-11,Vikram,42.0,Kolhapur,Backpack,Accessories,4.0,2200,,Card,
+ORD1064,2025-04-01,Isha,28.0,Mumbai,Laptop,Electronics,2.0,55000,10.0,upi,99000.0
+ORD1065,2025-08-26,Ananya,24.0,pune,Monitor,Electronics,2.0,12500,10.0,upi,22500.0
+ORD1066,2025-03-23,Isha,50.0,pune,Pen Set,Stationery,7.0,150,15.0,Cash,892.5
+ORD1067,2025-11-17,Sneha,50.0,Nashik,Monitor,Electronics,5.0,12500,15.0,Net Banking,53125.0
+ORD1068,2025-06-21,Ananya,32.0,Pune,Mouse,Electronics,5.0,650,0.0,Card,3250.0
+ORD1069,2025-12-28,Sneha,24.0,Pune,Keyboard,Electronics,4.0,1200,10.0,Net Banking,4320.0
+ORD1070,2025-08-01,Aarav,50.0,Kolhapur,Desk,Furniture,6.0,7000,15.0,Net Banking,35700.0
+ORD1071,2025-09-02,Aarav,42.0,Nagpur,Desk,Furniture,1.0,7000,15.0,Cash,5950.0
+ORD1072,2025-11-05,Sneha,,pune,Desk,Furniture,7.0,7000,15.0,Card,41650.0
+ORD1073,2025-07-19,Ananya,18.0,Mumbai ,Headphones,Electronics,7.0,8500,10.0,card,11340.0
+ORD1074,2025-01-14,Vikram,,Mumbai,Keyboard,Electronics,8.0,1200,0.0,UPI,9600.0
+ORD1075,2025-01-26,Om,24.0,Mumbai ,Desk,Furniture,3.0,7000,10.0,Cash,18900.0
+ORD1076,2025-07-14,Om,36.0,Mumbai ,Monitor,Electronics,8.0,12500,5.0,Cash,95000.0
+ORD1077,2025-01-27,Ananya,,Kolhapur,Mouse,Electronics,8.0,650,0.0,card,5200.0
+ORD1078,2025-04-13,Aarav,28.0,Satara,Mouse,Electronics,1.0,650,0.0,Card,650.0
+ORD1079,2025-10-16,Sneha,21.0,pune,Keyboard,Electronics,8.0,1200,,card,
+ORD1080,2025-03-25,Om,21.0,Pune,Headphones,Electronics,6.0,1800,0.0,upi,10800.0
+ORD1081,2025-07-23,Sneha,42.0,Pune,Laptop,Electronics,5.0,55000,15.0,upi,233750.0
+ORD1082,2025-12-17,Priya,32.0,Mumbai,Monitor,Electronics,2.0,12500,,Cash,
+ORD1083,2025-02-05,Ananya,36.0,Mumbai,Pen Set,Stationery,7.0,150,,Net Banking,
+ORD1084,2025-11-22,Isha,36.0,Satara,Notebook,Stationery,2.0,80,10.0,Net Banking,144.0
+ORD1085,2025-09-05,Isha,,Mumbai ,Keyboard,Electronics,5.0,1200,15.0,card,5100.0
+ORD1086,2025-02-14,Om,28.0,pune,Backpack,Accessories,5.0,2200,5.0,Card,10450.0
+ORD1087,2025-09-11,Ananya,18.0,Satara,Notebook,Stationery,7.0,80,5.0,Net Banking,532.0
+ORD1088,2025-05-24,Om,36.0,Mumbai,Monitor,Electronics,6.0,12500,5.0,upi,71250.0
+ORD1089,2025-09-08, om ,42.0,pune,Monitor,Electronics,2.0,12500,0.0,card,25000.0
+ORD1090,2025-05-31,Sneha,21.0,Mumbai ,Notebook,Stationery,8.0,80,0.0,card,640.0
+ORD1091,2025-08-31,Ananya,36.0,Mumbai ,Monitor,Electronics,5.0,12500,,card,
+ORD1092,2025-05-19,Om,50.0,Nashik,Pen Set,Stationery,6.0,150,5.0,Card,855.0
+ORD1093,2025-10-02,Rahul,21.0,Kolhapur,Mouse,Electronics,4.0,650,5.0,Card,2470.0
+ORD1094,2025-11-02,Om,,Pune,Notebook,Stationery,5.0,80,,Card,
+ORD1095,2025-06-04,Aarav,24.0,Satara,Headphones,Electronics,4.0,1800,5.0,Cash,6840.0
+ORD1096,2025-12-24,Rahul,32.0,pune,Laptop,Electronics,1.0,55000,15.0,UPI,46750.0
+ORD1097,2025-08-14,Ananya,50.0,Satara,Laptop,Electronics,5.0,55000,10.0,UPI,247500.0
+ORD1098,2025-07-25,Isha,21.0,Pune,Headphones,Electronics,8.0,1800,0.0,upi,14400.0
+ORD1099,2025-02-13,Sneha,32.0,Pune,Laptop,Electronics,3.0,55000,0.0,upi,165000.0
+ORD1100,2025-08-19,Isha,42.0,Nashik,Desk,Furniture,4.0,7000,15.0,upi,23800.0
