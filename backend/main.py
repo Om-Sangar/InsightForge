@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import math
 import io
+import re
 
 from backend.data_profiler import profile_dataframe
 from backend.suggestions import generate_suggestions
@@ -13,7 +14,12 @@ from backend.ai_assistant import generate_ai_suggestions, generate_chat_reply
 
 app = FastAPI()
 
-current_data = {"df": None, "log": []}
+current_data = {"df": None, "original_df": None, "log": []}
+
+PLACEHOLDER_VALUES = [
+    "N/A", "NA", "n/a", "null", "NULL", "None", "none",
+    "-", "--", "?", "unknown", "Unknown", "UNKNOWN"
+]
 
 
 class Suggestion(BaseModel):
@@ -30,7 +36,6 @@ class ChatRequest(BaseModel):
 
 
 def clean_for_json(records: list[dict]) -> list[dict]:
-    """Replace any NaN/NaT values with None so the response is valid JSON."""
     cleaned = []
     for row in records:
         clean_row = {}
@@ -48,10 +53,11 @@ def clean_for_json(records: list[dict]) -> list[dict]:
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     contents = await file.read()
-    df = pd.read_csv(io.BytesIO(contents))
+    df = pd.read_csv(io.BytesIO(contents), na_values=PLACEHOLDER_VALUES, keep_default_na=True)
     df.columns = df.columns.str.strip()
 
-    current_data["df"] = df
+    current_data["original_df"] = df.copy()
+    current_data["df"] = df.copy()
     current_data["log"] = []
 
     profile = profile_dataframe(df)
@@ -159,20 +165,71 @@ async def chat_with_assistant(req: ChatRequest):
     return {"reply": reply}
 
 
-@app.get("/outlier-values")
-async def get_outlier_values(column: str):
+@app.get("/flagged-values")
+async def get_flagged_values(column: str, kind: str):
     df = current_data["df"]
     if df is None:
         return {"error": "No dataset uploaded yet."}
 
-    q1 = df[column].quantile(0.25)
-    q3 = df[column].quantile(0.75)
-    iqr = q3 - q1
-    lower = q1 - 1.5 * iqr
-    upper = q3 + 1.5 * iqr
+    if kind == "outliers":
+        q1 = df[column].quantile(0.25)
+        q3 = df[column].quantile(0.75)
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        flagged = df[(df[column] < lower) | (df[column] > upper)]
 
-    outliers = df[(df[column] < lower) | (df[column] > upper)]
-    records = outliers.to_dict(orient="records")
-    records = clean_for_json(records)
+    elif kind == "future_dates":
+        parsed = pd.to_datetime(df[column], errors="coerce", format="mixed")
+        flagged = df[parsed > pd.Timestamp.now()]
 
-    return {"outlier_rows": records}
+    elif kind == "invalid_emails":
+        pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+        non_null_mask = df[column].notna()
+        invalid_mask = non_null_mask & ~df[column].astype(str).str.match(pattern)
+        flagged = df[invalid_mask]
+
+    else:
+        return {"error": f"Unknown kind: {kind}"}
+
+    records = clean_for_json(flagged.to_dict(orient="records"))
+    return {"flagged_rows": records}
+
+
+@app.post("/reset")
+async def reset_to_original():
+    if current_data["original_df"] is None:
+        return {"error": "No original dataset to reset to."}
+
+    df = current_data["original_df"].copy()
+    current_data["df"] = df
+
+    current_data["log"].append({
+        "action": "reset_to_original",
+        "column": None,
+        "message": "Reset dataset to its original, unmodified state.",
+        "timestamp": datetime.now().strftime("%H:%M:%S")
+    })
+
+    profile = profile_dataframe(df)
+    suggestions = generate_suggestions(profile)
+
+    return {
+        "message": "Dataset reset to original.",
+        "profile": profile,
+        "suggestions": suggestions,
+        "cleaning_log": current_data["log"]
+    }
+
+
+@app.get("/compare")
+async def compare_original_vs_current():
+    original_df = current_data["original_df"]
+    current_df = current_data["df"]
+    if original_df is None or current_df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    return {
+        "original": profile_dataframe(original_df),
+        "current": profile_dataframe(current_df)
+    }

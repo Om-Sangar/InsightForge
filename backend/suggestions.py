@@ -34,7 +34,7 @@ def generate_suggestions(profile: dict) -> list:
                 "outlier_bounds": [stats["lower_bound"], stats["upper_bound"]]
             })
 
-        # Inconsistent text categories (e.g. "Pune" / " pune" / "PUNE")
+        # Inconsistent text categories
         if stats.get("inconsistent_variants", 0) > 0:
             example_text = ""
             if stats.get("variant_examples"):
@@ -52,7 +52,45 @@ def generate_suggestions(profile: dict) -> list:
                 "severity": "medium"
             })
 
-    # Duplicate rows (dataset-level, not column-level)
+        # Date parsing
+        if stats.get("likely_date") and stats.get("invalid_date_count", 0) > 0:
+            suggestions.append({
+                "column": col_name,
+                "issue": "unparseable_dates",
+                "message": (
+                    f"'{col_name}' looks like a date column with {stats['invalid_date_count']} value(s) "
+                    f"that aren't valid dates. Convert to proper date format? (unparseable values become missing)"
+                ),
+                "action": "parse_dates",
+                "severity": "medium"
+            })
+
+        # Future dates — flagged for review, not auto-fixed
+        if stats.get("likely_date") and stats.get("future_date_count", 0) > 0:
+            suggestions.append({
+                "column": col_name,
+                "issue": "future_dates",
+                "message": (
+                    f"'{col_name}' has {stats['future_date_count']} date(s) in the future. "
+                    f"This could be intentional (e.g. a scheduled date) or an entry error — review before deciding."
+                ),
+                "action": "review_future_dates",
+                "severity": "low"
+            })
+
+        # Invalid email formats — flagged for review, not auto-fixed
+        if stats.get("likely_email") and stats.get("invalid_email_count", 0) > 0:
+            suggestions.append({
+                "column": col_name,
+                "issue": "invalid_emails",
+                "message": (
+                    f"'{col_name}' has {stats['invalid_email_count']} value(s) that don't look like valid "
+                    f"email addresses. Review them before deciding what to do."
+                ),
+                "action": "review_invalid_emails",
+                "severity": "low"
+            })
+
     if profile["duplicate_rows"] > 0:
         suggestions.append({
             "column": None,

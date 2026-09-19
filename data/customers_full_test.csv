@@ -1,0 +1,37 @@
+customer_id,name,age,email,signup_date,city,region,purchase_amount
+126,Riya Patel,33,riya.patel@gmail.com,2025-03-14,KOLHAPUR,North,3346.95
+126,Riya Patel,33,riya.patel@gmail.com,2025-03-14,KOLHAPUR,North,3346.95
+123,Riya Shaikh,20,riya.shaikh@yahoo.com,2024-11-02,mumbai,North,3617.3
+103,Ishaan Gupta,45,ishaan.gupta@gmail.com,N/A, pune,East,3867.15
+122,Aarav Nair,,aarav.nair@,2025-01-20, pune,South,3591.91
+106,Ananya Patel,,ananya.patel@outlook.com,2024-08-09, pune,West,2941.12
+104,Riya Sharma,26,riyasharmagmail.com,2024-05-17,mumbai,East,3182.2
+134,Kabir Reddy,53,kabir.reddy@yahoo.com,2099-01-01,unknown,West,54630.55
+124,Aarav Nair,25,aarav.nair@gmail.com,2024-12-11,Pune,West,2242.37
+105,Meera Gupta,54,meera.gupta@gmail.com,2025-06-30,Nagpur,North,3645.55
+100,Rohan Patel,41,rohan.patel@gmail.com,2024-02-18,Kolhapur,West,49384.65
+125,Kabir Patel,,kabir.patel@gmail.com,N/A,KOLHAPUR,West,43946.67
+102,Meera Gupta,18,meera18@,2024-07-25, pune,West,1414.69
+120,Diya Iyer,51,diya.iyer@gmail.com,2025-09-05,mumbai,East,1374.48
+119,Meera Shaikh,38,meera.shaikh@yahoo.com,2024-10-14,Mumbai,West,3283.15
+133,Rohan Shaikh,52,rohan.shaikh@gmail.com,2100-05-20,Kolhapur,East,1130.43
+110,Diya Iyer,57,diya.iyer@gmail.com,2024-04-03,Kolhapur,South,1461.17
+109,Ananya Shaikh,20,ananya.shaikh@gmail.com,null,-,West,2519.12
+118,Ishaan Patel,23,ishaan.patel@outlook.com,2025-02-11,Pune,East,1301.22
+128,Aarav Patel,20,aarav.patel@gmail.com,2024-09-27,NA,East,3906.36
+101,Rohan Shaikh,,rohan.shaikh2@gmail.com,2025-05-08,Nagpur,East,2664.55
+111,Diya Nair,51,diya.nair@,2024-06-19, pune,West,58812.43
+113,Diya Reddy,19,diya.reddy@gmail.com,2024-03-22,mumbai,North,522.3
+129,Meera Nair,38,meera.nair@yahoo.com,2025-07-16,Mumbai,East,2693.58
+131,Arjun Patel,20,arjun.patel@gmail.com,2024-01-30,mumbai,East,2655.7
+132,Aarav Reddy,58,aarav.reddy@gmail.com,2025-04-12,Mumbai,East,3816.07
+121,Diya Patel,30,diya.patel@gmail.com,2024-11-25,KOLHAPUR,East,2367.82
+117,Rohan Reddy,29,rohan.reddy@gmail.com,2025-08-01,Kolhapur,West,2522.68
+115,Ananya Nair,37,ananya.nair@gmail.com,2024-05-05,Pune,South,3105.0
+112,Ananya Gupta,58,ananya.gupta@yahoo.com,2025-10-09,Nagpur,South,2228.17
+107,Ananya Verma,22,ananya.verma@gmail.com,2024-02-14,Nagpur,West,1573.1
+114,Kabir Reddy,56,kabir.reddy2@gmail.com,2024-12-28,Kolhapur,West,3832.91
+130,Ananya Shaikh,39,ananya.shaikh2@gmail.com,-,--,West,2949.36
+127,Aarav Iyer,33,aarav.iyer@gmail.com,2025-01-17, pune,East,488.6
+108,Aarav Iyer,45,aarav.iyer2@gmail.com,2024-07-08,Kolhapur,West,51727.5
+116,Ananya Gupta,24,ananya.gupta2@gmail.com,2025-03-30,mumbai,North,1447.06
