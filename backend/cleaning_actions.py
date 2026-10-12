@@ -20,11 +20,42 @@ def apply_action(df: pd.DataFrame, action: str, column: str = None) -> pd.DataFr
         df[column] = df[column].clip(lower=lower_bound, upper=upper_bound)
 
     elif action == "review_outliers":
-        pass  # informational only — no data change
+        pass
 
     elif action == "standardize_text":
         mask = df[column].notna()
         df.loc[mask, column] = df.loc[mask, column].astype(str).str.strip().str.title()
+
+    elif action == "parse_dates":
+        df[column] = pd.to_datetime(df[column], errors="coerce", format="mixed")
+
+    elif action == "review_future_dates":
+        pass  # kept for the flag itself; use the actions below to actually fix
+
+    elif action == "review_invalid_emails":
+        pass  # kept for the flag itself; use the actions below to actually fix
+
+    elif action == "blank_invalid_emails":
+        pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+        non_null_mask = df[column].notna()
+        invalid_mask = non_null_mask & ~df[column].astype(str).str.match(pattern)
+        df.loc[invalid_mask, column] = None
+
+    elif action == "drop_invalid_emails":
+        pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+        non_null_mask = df[column].notna()
+        invalid_mask = non_null_mask & ~df[column].astype(str).str.match(pattern)
+        df = df[~invalid_mask]
+
+    elif action == "blank_future_dates":
+        parsed = pd.to_datetime(df[column], errors="coerce", format="mixed")
+        future_mask = parsed > pd.Timestamp.now()
+        df.loc[future_mask, column] = None
+
+    elif action == "drop_future_dates":
+        parsed = pd.to_datetime(df[column], errors="coerce", format="mixed")
+        future_mask = parsed > pd.Timestamp.now()
+        df = df[~future_mask]
 
     else:
         raise ValueError(f"Unknown action: {action}")

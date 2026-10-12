@@ -11,6 +11,7 @@ from backend.data_profiler import profile_dataframe
 from backend.suggestions import generate_suggestions
 from backend.cleaning_actions import apply_action
 from backend.ai_assistant import generate_ai_suggestions, generate_chat_reply
+from backend.table_builder import generate_table_suggestions, build_table
 
 app = FastAPI()
 
@@ -20,6 +21,8 @@ PLACEHOLDER_VALUES = [
     "N/A", "NA", "n/a", "null", "NULL", "None", "none",
     "-", "--", "?", "unknown", "Unknown", "UNKNOWN"
 ]
+
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class Suggestion(BaseModel):
@@ -33,6 +36,19 @@ class Suggestion(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     history: list[dict] = []
+
+
+class TableRequest(BaseModel):
+    groupby: str
+    agg_column: str | None = None
+    agg_function: str = "mean"
+    title: str | None = None
+
+
+class CorrectionRequest(BaseModel):
+    column: str
+    kind: str
+    changes: list[dict]  # each: {"row_id": int, "value": str}
 
 
 def clean_for_json(records: list[dict]) -> list[dict]:
@@ -192,8 +208,73 @@ async def get_flagged_values(column: str, kind: str):
     else:
         return {"error": f"Unknown kind: {kind}"}
 
+    # Include each row's original index so corrections can be mapped back to it
+    flagged = flagged.copy()
+    flagged.insert(0, "_row_id", flagged.index)
+
     records = clean_for_json(flagged.to_dict(orient="records"))
     return {"flagged_rows": records}
+
+
+@app.post("/update-values")
+async def update_values(req: CorrectionRequest):
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+    if req.column not in df.columns:
+        return {"error": f"Unknown column: {req.column}"}
+    if req.kind not in ("invalid_emails", "future_dates"):
+        return {"error": f"Unknown kind: {req.kind}"}
+
+    updated = 0
+    rejected = []
+
+    for change in req.changes:
+        row_id = change.get("row_id")
+        value = str(change.get("value", "")).strip()
+
+        if row_id not in df.index:
+            rejected.append({"row_id": row_id, "value": value, "reason": "that row no longer exists"})
+            continue
+
+        if req.kind == "invalid_emails":
+            if not EMAIL_PATTERN.match(value):
+                rejected.append({"row_id": row_id, "value": value, "reason": "still not a valid email"})
+                continue
+            new_value = value
+
+        else:  # future_dates
+            parsed = pd.to_datetime(pd.Series([value]), errors="coerce", format="mixed").iloc[0]
+            if pd.isna(parsed):
+                rejected.append({"row_id": row_id, "value": value, "reason": "not a valid date"})
+                continue
+            if parsed > pd.Timestamp.now():
+                rejected.append({"row_id": row_id, "value": value, "reason": "date is still in the future"})
+                continue
+            if pd.api.types.is_datetime64_any_dtype(df[req.column]):
+                new_value = parsed
+            else:
+                new_value = parsed.strftime("%Y-%m-%d")
+
+        df.loc[row_id, req.column] = new_value
+        updated += 1
+
+    if updated:
+        current_data["log"].append({
+            "action": "manual_correction",
+            "column": req.column,
+            "message": f"Manually corrected {updated} value(s) in '{req.column}'",
+            "timestamp": datetime.now().strftime("%H:%M:%S")
+        })
+
+    profile = profile_dataframe(df)
+    return {
+        "updated": updated,
+        "rejected": rejected,
+        "profile": profile,
+        "remaining_suggestions": generate_suggestions(profile),
+        "cleaning_log": current_data["log"]
+    }
 
 
 @app.post("/reset")
@@ -233,3 +314,28 @@ async def compare_original_vs_current():
         "original": profile_dataframe(original_df),
         "current": profile_dataframe(current_df)
     }
+
+
+@app.get("/table-suggestions")
+async def table_suggestions():
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    suggestions = generate_table_suggestions(df)
+    return {"table_suggestions": suggestions}
+
+
+@app.post("/create-table")
+async def create_table(req: TableRequest):
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    try:
+        rows = build_table(df, req.groupby, req.agg_column, req.agg_function)
+        rows = clean_for_json(rows)
+    except Exception as e:
+        return {"error": str(e)}
+
+    return {"title": req.title or "Summary Table", "rows": rows}
