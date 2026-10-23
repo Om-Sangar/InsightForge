@@ -527,7 +527,22 @@ def page_cleaning():
 
 
 # ---------------- Screen 3: Table Creation ----------------
+
+def create_table_from(t: dict):
+    resp = requests.post(f"{BACKEND_URL}/create-table", json=t)
+    result = resp.json() if resp.status_code == 200 else {}
+    if "rows" in result:
+        already = any(x["title"] == result["title"] for x in st.session_state.created_tables)
+        if not already:
+            st.session_state.created_tables.append(result)
+        st.rerun()
+    else:
+        st.error(result.get("error", f"Request failed with status {resp.status_code}"))
+
+
 def page_tables():
+    from ai_picks_view import fetch_picks, get_picks, show_ai_fallback_notice
+
     page_header("Table Creation", "Summarize your cleaned data into useful groupings.")
     if not require_data():
         return
@@ -543,7 +558,11 @@ def page_tables():
         )
         st.button("← Back to Data Cleaning", on_click=go_to, args=(PAGES[1],))
 
-    if st.button("Suggest Tables"):
+    b1, b2, _spacer = st.columns([1, 1, 3])
+    if b1.button("✨ AI picks", type="primary"):
+        with st.spinner("Forge Assistant is choosing the most useful tables..."):
+            fetch_picks(BACKEND_URL, "tables")
+    if b2.button("Suggest Tables"):
         with st.spinner("Analyzing columns..."):
             ts = requests.get(f"{BACKEND_URL}/table-suggestions")
         if ts.status_code == 200:
@@ -551,21 +570,28 @@ def page_tables():
         else:
             st.error("Could not get table suggestions.")
 
+    ai = get_picks("tables")
+    if ai:
+        with st.container(border=True):
+            st.subheader("✨ Forge Assistant's picks")
+            show_ai_fallback_notice(ai)
+            for i, t in enumerate(ai["picks"]):
+                col1, col2 = st.columns([4, 1])
+                col1.write(f"**{t['title']}**")
+                col1.caption(t["reason"])
+                if col2.button("Create", key=f"ai_table_{i}"):
+                    create_table_from(t)
+    elif st.session_state.get("ai_tables_picks"):
+        st.caption("Your data changed since the last AI picks — click “✨ AI picks” to refresh them.")
+
     if st.session_state.table_suggestions:
         with st.container(border=True):
+            st.subheader("All suggestions")
             for i, t in enumerate(st.session_state.table_suggestions):
                 col1, col2 = st.columns([4, 1])
                 col1.write(f"• **{t['title']}** — {t['rationale']}")
                 if col2.button("Create", key=f"table_{i}"):
-                    resp = requests.post(f"{BACKEND_URL}/create-table", json=t)
-                    result = resp.json() if resp.status_code == 200 else {}
-                    if "rows" in result:
-                        already = any(x["title"] == result["title"] for x in st.session_state.created_tables)
-                        if not already:
-                            st.session_state.created_tables.append(result)
-                        st.rerun()
-                    else:
-                        st.error(result.get("error", f"Request failed with status {resp.status_code}"))
+                    create_table_from(t)
 
     for table in st.session_state.created_tables:
         with st.container(border=True):
@@ -577,13 +603,13 @@ def page_tables():
     st.button("Continue to Dashboard →", type="primary", on_click=go_to, args=(PAGES[3],))
 
 
-# ---------------- Screen 4: Dashboard (placeholder) ----------------
+# ---------------- Screen 4: Dashboard ----------------
 def page_dashboard():
-    page_header("Dashboard", "Turn your tables into charts and KPIs.")
+    page_header("Dashboard", "Turn your cleaned data into charts and KPIs.")
     if not require_data():
         return
-    st.info("The dashboard builder is the next module. This screen is ready and waiting for it.")
-    st.write("Planned: KPI cards, bar / line / donut charts built from your tables, and filters.")
+    from dashboard_view import render_dashboard
+    render_dashboard(BACKEND_URL)
 
 
 # ---------------- Router ----------------

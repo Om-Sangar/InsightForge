@@ -12,6 +12,13 @@ from backend.suggestions import generate_suggestions
 from backend.cleaning_actions import apply_action
 from backend.ai_assistant import generate_ai_suggestions, generate_chat_reply
 from backend.table_builder import generate_table_suggestions, build_table
+from backend.chart_builder import (
+    generate_chart_suggestions,
+    build_chart_data,
+    build_kpis,
+    build_filter_options,
+    apply_filters,
+)
 
 app = FastAPI()
 
@@ -49,6 +56,11 @@ class CorrectionRequest(BaseModel):
     column: str
     kind: str
     changes: list[dict]  # each: {"row_id": int, "value": str}
+
+
+class DashboardRequest(BaseModel):
+    charts: list[dict] = []
+    filters: dict[str, list[str]] = {}
 
 
 def clean_for_json(records: list[dict]) -> list[dict]:
@@ -339,3 +351,42 @@ async def create_table(req: TableRequest):
         return {"error": str(e)}
 
     return {"title": req.title or "Summary Table", "rows": rows}
+
+
+@app.get("/chart-suggestions")
+async def chart_suggestions():
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    return {
+        "chart_suggestions": generate_chart_suggestions(df),
+        "filter_options": build_filter_options(df),
+    }
+
+
+@app.post("/dashboard")
+async def dashboard(req: DashboardRequest):
+    df = current_data["df"]
+    if df is None:
+        return {"error": "No dataset uploaded yet."}
+
+    filtered = apply_filters(df, req.filters)
+    specs = req.charts or generate_chart_suggestions(df)
+
+    charts = []
+    for spec in specs:
+        try:
+            data = build_chart_data(filtered, spec)
+            charts.append({**spec, "data": data})
+        except Exception as e:
+            charts.append({**spec, "data": [], "error": str(e)})
+
+    return {
+        "kpis": build_kpis(df, filtered),
+        "charts": charts,
+        "rows_after_filter": int(len(filtered)),
+    }
+from backend.ai_picks import create_ai_picks_router
+
+app.include_router(create_ai_picks_router(lambda: current_data["df"]))
