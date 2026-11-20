@@ -2,11 +2,10 @@ import html
 import requests
 import pandas as pd
 import streamlit as st
-import os
 
 st.set_page_config(page_title="InsightForge", page_icon="📊", layout="wide")
 
-BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8001")
+BACKEND_URL = "http://127.0.0.1:8001"
 
 PAGES = ["Upload Data", "Data Cleaning", "Table Creation", "Dashboard"]
 PAGE_ICONS = {
@@ -273,44 +272,21 @@ def render_chat_panel():
 
 # ---------------- Screen 1: Upload ----------------
 def page_upload():
-    page_header(
-        "Upload Data",
-        "Upload a CSV or Excel file. Placeholder values like N/A, null and '-' are treated as missing automatically.",
-    )
+    page_header("Upload Data", "Upload a CSV file. Placeholder values like N/A, null and '-' are treated as missing automatically.")
 
-    uploaded_file = st.file_uploader("Upload a CSV or Excel (.xlsx) file", type=["csv", "xlsx"], key="file_uploader")
-
-    sheet = None
-    if uploaded_file is not None and uploaded_file.name.lower().endswith(".xlsx"):
-        try:
-            sheet_names = pd.ExcelFile(uploaded_file).sheet_names
-        except Exception:
-            st.error("Couldn't read this Excel file. Check that it isn't password-protected or corrupted.")
-            return
-        sheet = sheet_names[0]
-        if len(sheet_names) > 1:
-            sheet = st.selectbox("Which sheet should InsightForge use?", sheet_names, key="excel_sheet")
+    uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"], key="file_uploader")
 
     if uploaded_file is not None:
-        sig = f"{uploaded_file.name}:{uploaded_file.size}:{sheet}"
+        sig = f"{uploaded_file.name}:{uploaded_file.size}"
         if st.session_state.upload_sig != sig:
-            files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "application/octet-stream")}
+            files = {"file": (uploaded_file.name, uploaded_file.getvalue(), "text/csv")}
             try:
-                response = requests.post(
-                    f"{BACKEND_URL}/upload",
-                    files=files,
-                    data={"sheet": sheet} if sheet else None,
-                    timeout=60,
-                )
+                response = requests.post(f"{BACKEND_URL}/upload", files=files, timeout=60)
             except requests.exceptions.RequestException:
                 st.error("Couldn't reach the backend — make sure the server is running.")
                 return
             if response.status_code != 200:
-                try:
-                    detail = response.json().get("detail", "")
-                except ValueError:
-                    detail = ""
-                st.error(f"Upload failed (status {response.status_code}). {detail}")
+                st.error(f"Upload failed (status {response.status_code}).")
                 return
 
             data = response.json()
@@ -508,27 +484,14 @@ def page_cleaning():
             c2.write(f"Rows: {cmp['current']['row_count']}")
             c2.write(f"Duplicate rows: {cmp['current']['duplicate_rows']}")
 
-    d1, d2, _spacer = st.columns([1, 1.2, 2])
     dl = requests.get(f"{BACKEND_URL}/download")
     if dl.status_code == 200:
-        d1.download_button(
+        st.download_button(
             "⬇ Download Current CSV",
             data=dl.content,
             file_name="cleaned_data.csv",
             mime="text/csv",
         )
-
-    script_resp = requests.get(f"{BACKEND_URL}/export-script")
-    if script_resp.status_code == 200:
-        script_text = script_resp.text
-        d2.download_button(
-            "🐍 Export cleaning code",
-            data=script_text,
-            file_name="insightforge_cleaning.py",
-            mime="text/x-python",
-        )
-        with st.expander("👀 View generated cleaning code"):
-            st.code(script_text, language="python")
 
     with st.container(border=True):
         st.subheader("Suggestions (Rule-Based)")
