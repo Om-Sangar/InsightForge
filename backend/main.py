@@ -390,3 +390,6 @@ async def dashboard(req: DashboardRequest):
 from backend.ai_picks import create_ai_picks_router
 
 app.include_router(create_ai_picks_router(lambda: current_data["df"]))
+
+from backend.auth import router as auth_router
+app.include_router(auth_router)
