@@ -1,5 +1,5 @@
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import StreamingResponse, PlainTextResponse
 from pydantic import BaseModel
 from datetime import datetime
 import pandas as pd
@@ -12,6 +12,7 @@ from backend.suggestions import generate_suggestions
 from backend.cleaning_actions import apply_action
 from backend.ai_assistant import generate_ai_suggestions, generate_chat_reply
 from backend.table_builder import generate_table_suggestions, build_table
+from backend.export_script import build_script
 from backend.chart_builder import (
     generate_chart_suggestions,
     build_chart_data,
@@ -22,7 +23,7 @@ from backend.chart_builder import (
 
 app = FastAPI()
 
-current_data = {"df": None, "original_df": None, "log": []}
+current_data = {"df": None, "original_df": None, "log": [], "source": None}
 
 PLACEHOLDER_VALUES = [
     "N/A", "NA", "n/a", "null", "NULL", "None", "none",
@@ -79,20 +80,43 @@ def clean_for_json(records: list[dict]) -> list[dict]:
 
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), sheet: str | None = Form(None)):
     contents = await file.read()
-    df = pd.read_csv(io.BytesIO(contents), na_values=PLACEHOLDER_VALUES, keep_default_na=True)
-    df.columns = df.columns.str.strip()
+    filename = file.filename or "uploaded_file"
+    is_excel = filename.lower().endswith((".xlsx", ".xlsm"))
+
+    try:
+        if is_excel:
+            df = pd.read_excel(
+                io.BytesIO(contents),
+                sheet_name=sheet or 0,
+                na_values=PLACEHOLDER_VALUES,
+                keep_default_na=True,
+            )
+        else:
+            df = pd.read_csv(io.BytesIO(contents), na_values=PLACEHOLDER_VALUES, keep_default_na=True)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Could not read this file: {e}")
+
+    if len(df) == 0 or len(df.columns) == 0:
+        raise HTTPException(status_code=400, detail="The file has no data rows.")
+
+    df.columns = df.columns.astype(str).str.strip()
 
     current_data["original_df"] = df.copy()
     current_data["df"] = df.copy()
     current_data["log"] = []
+    current_data["source"] = {
+        "filename": filename,
+        "kind": "excel" if is_excel else "csv",
+        "sheet": sheet if is_excel else None,
+    }
 
     profile = profile_dataframe(df)
     suggestions = generate_suggestions(profile)
 
     return {
-        "filename": file.filename,
+        "filename": filename,
         "profile": profile,
         "suggestions": suggestions
     }
@@ -185,6 +209,15 @@ async def download_data():
     return response
 
 
+@app.get("/export-script")
+async def export_script():
+    if current_data["df"] is None:
+        return PlainTextResponse("# No dataset uploaded yet.", status_code=404)
+
+    script = build_script(current_data["source"], current_data["log"], PLACEHOLDER_VALUES)
+    return PlainTextResponse(script)
+
+
 @app.post("/chat")
 async def chat_with_assistant(req: ChatRequest):
     df = current_data["df"]
@@ -240,6 +273,7 @@ async def update_values(req: CorrectionRequest):
 
     updated = 0
     rejected = []
+    applied = []  # remembered in the log so the exported script can replay these edits
 
     for change in req.changes:
         row_id = change.get("row_id")
@@ -254,6 +288,7 @@ async def update_values(req: CorrectionRequest):
                 rejected.append({"row_id": row_id, "value": value, "reason": "still not a valid email"})
                 continue
             new_value = value
+            logged_value = value
 
         else:  # future_dates
             parsed = pd.to_datetime(pd.Series([value]), errors="coerce", format="mixed").iloc[0]
@@ -263,20 +298,23 @@ async def update_values(req: CorrectionRequest):
             if parsed > pd.Timestamp.now():
                 rejected.append({"row_id": row_id, "value": value, "reason": "date is still in the future"})
                 continue
+            logged_value = parsed.strftime("%Y-%m-%d")
             if pd.api.types.is_datetime64_any_dtype(df[req.column]):
                 new_value = parsed
             else:
-                new_value = parsed.strftime("%Y-%m-%d")
+                new_value = logged_value
 
         df.loc[row_id, req.column] = new_value
         updated += 1
+        applied.append({"row_id": int(row_id), "value": logged_value})
 
     if updated:
         current_data["log"].append({
             "action": "manual_correction",
             "column": req.column,
             "message": f"Manually corrected {updated} value(s) in '{req.column}'",
-            "timestamp": datetime.now().strftime("%H:%M:%S")
+            "timestamp": datetime.now().strftime("%H:%M:%S"),
+            "changes": applied,
         })
 
     profile = profile_dataframe(df)
@@ -387,6 +425,8 @@ async def dashboard(req: DashboardRequest):
         "charts": charts,
         "rows_after_filter": int(len(filtered)),
     }
+
+
 from backend.ai_picks import create_ai_picks_router
 
 app.include_router(create_ai_picks_router(lambda: current_data["df"]))
